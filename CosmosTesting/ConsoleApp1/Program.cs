@@ -19,9 +19,11 @@
                     DatabaseName,
                     CollectionName);
 
+
+            MainAsync().Wait();
         }
 
-        public async static void MainAsync()
+        static async Task MainAsync()
         {
             var provider = new CosmosDataProvider();
 
