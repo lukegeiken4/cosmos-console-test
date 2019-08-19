@@ -11,7 +11,7 @@
     using Microsoft.Azure.Documents.Client;
     using Microsoft.Azure.Documents.Linq;
 
-    public class CosmosDataProvider : ICosmosDataProvider
+    public class CosmosDataProvider
     {
         #region Private const members
 
