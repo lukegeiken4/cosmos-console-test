@@ -95,10 +95,10 @@
 
         private void SetupDocumentClient()
         {
-            var uri = ConfigurationManager.AppSettings["CosmosURI"];
-            var secret = ConfigurationManager.AppSettings["CosmosDBKeySecretUri"];
-            this.Client = new DocumentClient(
-                new Uri(uri), secret);
+                var uri = ConfigurationManager.AppSettings["CosmosURI"];
+                var secret = ConfigurationManager.AppSettings["CosmosDBKeySecretUri"];
+                this.Client = new DocumentClient(
+                    new Uri(uri), secret);
         }
         #endregion
     }
