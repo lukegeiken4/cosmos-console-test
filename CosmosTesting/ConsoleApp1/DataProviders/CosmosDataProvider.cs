@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1
+﻿namespace ConsoleApp1.DataProviders
 {
     using System;
     using System.Configuration;
@@ -10,6 +10,7 @@
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents.Client;
     using Microsoft.Azure.Documents.Linq;
+    using ConsoleApp1.Models;
 
     public class CosmosDataProvider
     {
@@ -43,7 +44,7 @@
 
         #region Public Methods
 
-        public async Task<object> ExecuteQueryAsync<T>(
+        public async Task<CosmosResponse<T>> ExecuteQueryAsync<T>(
             string collectionUri,
             string sqlQuery,
             FeedOptions feedOptions,
@@ -59,9 +60,16 @@
             }
             while (docQuery.HasMoreResults && queryResponse.Count <= 0);
 
-            var ruCharge = queryResponse.RequestCharge;
+            var resp = new CosmosResponse<T>()
+            {
+                Items = queryResponse.ToList(),
+                Count = queryResponse.Count,
+                RuCharge = queryResponse.RequestCharge,
+                ContToken = queryResponse.ResponseContinuation
 
-            return queryResponse.ToList();
+            };
+
+            return resp;
         }
 
         /// <summary>
