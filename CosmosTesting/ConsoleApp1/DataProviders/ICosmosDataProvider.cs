@@ -10,9 +10,9 @@
     public interface ICosmosDataProvider
     {
         Task<object> ExecuteQueryAsync<T>(
-            string collectionName,
-            string query,
-            RequestOptions requestOptions,
+            string collectionUri,
+            string sqlQuery,
+            FeedOptions feedOptions,
             CancellationToken cancellationToken = default(CancellationToken));
     }
 }

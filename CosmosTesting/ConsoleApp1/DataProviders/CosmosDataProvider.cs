@@ -9,7 +9,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents.Client;
-
+    using Microsoft.Azure.Documents.Linq;
 
     public class CosmosDataProvider : ICosmosDataProvider
     {
@@ -44,42 +44,24 @@
         #region Public Methods
 
         public async Task<object> ExecuteQueryAsync<T>(
-            string collectionName,
-            string query,
-            RequestOptions requestOptions,
+            string collectionUri,
+            string sqlQuery,
+            FeedOptions feedOptions,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            var query = this.Client.CreateDocumentQuery(collectionUri, sqlQuery, feedOptions);
+            var docQuery = query.AsDocumentQuery();
+            FeedResponse<T> queryResponse = null;
 
-            //CosmosQueryResponse<T> response = new CosmosQueryResponse<T>();
-            //Tuple<bool, CosmosQueryResponse<T>> result = Tuple.Create(false, response);
+            do
+            {
+                queryResponse = await docQuery.ExecuteNextAsync<T>(cancellationToken);
+            }
+            while (docQuery.HasMoreResults && queryResponse.Count <= 0);
 
-            //try
-            //{
-            //    Container container = this.Db.GetContainer(collectionName);
+            var ruCharge = queryResponse.RequestCharge;
 
-            //    List<T> results = new List<T>();
-            //    FeedIterator<T> resultSetIterator = container.GetItemQueryIterator<T>(query, null, requestOptions);
-            //    double totalRUs = 0;
-            //    while (resultSetIterator.HasMoreResults)
-            //    {
-            //        var read = await resultSetIterator.ReadNextAsync();
-            //        totalRUs += read.RequestCharge;
-            //        results.AddRange(read);
-            //    }
-
-            //    return new CosmosQueryResponse<T>
-            //    {
-            //        Items = results,
-            //        Token = null,
-            //        Total = results.Count()
-            //    };
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw;
-            //}
-            return null;
+            return queryResponse.ToList();
         }
 
         /// <summary>
