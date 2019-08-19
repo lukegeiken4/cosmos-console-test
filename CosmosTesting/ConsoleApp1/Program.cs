@@ -28,6 +28,7 @@
         {
             var provider = new CosmosDataProvider();
 
+            // https://docs.microsoft.com/en-us/azure/cosmos-db/profile-sql-api-query
             Console.WriteLine("[Running DESC query]");
             var descQuery = "SELECT * from m WHERE m.createdDateTimeUtc != null ORDER BY m.createdDateTimeUtc DESC";
 
@@ -37,7 +38,8 @@
                 descQuery,
                 new FeedOptions()
                 {
-                    EnableCrossPartitionQuery = true
+                    EnableCrossPartitionQuery = true,
+                    PopulateQueryMetrics = true
                 });
             Console.WriteLine("RU: " + descResp.RuCharge);
 
@@ -51,7 +53,8 @@
                 ascQuery,
                 new FeedOptions()
                 {
-                    EnableCrossPartitionQuery = true
+                    EnableCrossPartitionQuery = true,
+                    PopulateQueryMetrics = true
                 });
             Console.WriteLine("RU: " + ascResp.RuCharge);
 
