@@ -6,6 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using ConsoleApp1.DataProviders;
+    using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
 
     public class Program
@@ -42,6 +43,15 @@
                     PopulateQueryMetrics = true
                 });
             Console.WriteLine("RU: " + descResp.RuCharge);
+            Console.WriteLine("*** Metrics ***");
+            foreach (KeyValuePair<string, QueryMetrics> kvp in descResp.Metrics)
+            {
+                string partitionId = kvp.Key;
+                QueryMetrics queryMetrics = kvp.Value;
+
+                // Do whatever logging you need
+                Console.WriteLine($"{partitionId}: {queryMetrics}");
+            }
 
             Console.WriteLine("");
             Console.WriteLine("[Running ASC query]");

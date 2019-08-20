@@ -1,5 +1,6 @@
 ﻿namespace ConsoleApp1.Models
 {
+    using Microsoft.Azure.Documents;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,5 +13,6 @@
         public int Count { get; set; }
         public string ContToken { get; set; }
         public double RuCharge { get; set; }
+        public IReadOnlyDictionary<string, QueryMetrics> Metrics { get; set; }
     }
 }

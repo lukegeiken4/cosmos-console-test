@@ -65,8 +65,8 @@
                 Items = queryResponse.ToList(),
                 Count = queryResponse.Count,
                 RuCharge = queryResponse.RequestCharge,
-                ContToken = queryResponse.ResponseContinuation
-
+                ContToken = queryResponse.ResponseContinuation,
+                Metrics = feedOptions.PopulateQueryMetrics ? queryResponse.QueryMetrics : null
             };
 
             return resp;
