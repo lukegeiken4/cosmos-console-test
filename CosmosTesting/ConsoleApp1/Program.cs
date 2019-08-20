@@ -29,6 +29,7 @@
 
         static async Task MainAsync()
         {
+            // Setting up file to write to
             FileStream ostrm;
             StreamWriter writer;
             TextWriter oldOut = Console.Out;
@@ -47,6 +48,12 @@
             Console.SetOut(writer);
 
             var provider = new CosmosDataProvider();
+
+            /**
+             * This is for the DESC query
+             * We do have null created dates due to data masking agents we run in our apps background.
+             * Thus why we have to check for null here
+             */
             var descQuery = "SELECT * from m WHERE m.createdDateTimeUtc != null ORDER BY m.createdDateTimeUtc DESC";
 
             ConsoleShowQueryHeader(descQuery);
@@ -67,6 +74,12 @@
 
             ConsoleNewLine();
 
+
+            /**
+             * This is for the ASC query
+             * We do have null created dates due to data masking agents we run in our apps background.
+             * Thus why we have to check for null here
+             */
             var ascQuery = "SELECT * from m WHERE m.createdDateTimeUtc != null ORDER BY m.createdDateTimeUtc ASC";
             ConsoleShowQueryHeader(ascQuery);
 
