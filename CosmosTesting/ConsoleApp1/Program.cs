@@ -35,7 +35,7 @@
             TextWriter oldOut = Console.Out;
             try
             {
-                string filename = String.Format("{0:yyyy-MM-dd_hh-mm-ss-tt}", DateTime.Now);
+                string filename = String.Format("{0:yyyy-MM-dd_hh-mm-ss-tt}_DESC", DateTime.Now);
                 ostrm = new FileStream($"../../output/{filename}.txt", FileMode.CreateNew, FileAccess.Write);
                 writer = new StreamWriter(ostrm);
             }
@@ -57,22 +57,46 @@
             var descQuery = "SELECT * from m WHERE m.createdDateTimeUtc != null ORDER BY m.createdDateTimeUtc DESC";
 
             ConsoleShowQueryHeader(descQuery);
-            var descResp = await provider.ExecuteQueryAsync<object>(
-                collectionUri.ToString(),
-                descQuery,
-                new FeedOptions()
-                {
-                    EnableCrossPartitionQuery = true,
-                    PopulateQueryMetrics = true
-                });
 
-            ConsoleShowQueryRU(descResp.RuCharge);
-            foreach (KeyValuePair<string, QueryMetrics> kvp in descResp.Metrics)
+            string contToken = null;
+            do
             {
-                ConsoleShowQueryMetrics(kvp.Key, kvp.Value);
-            }
+                var descResp = await provider.ExecuteQueryAsync<object>(
+                    collectionUri.ToString(),
+                    descQuery,
+                    new FeedOptions()
+                    {
+                        EnableCrossPartitionQuery = true,
+                        PopulateQueryMetrics = true,
+                        MaxItemCount = 100,
+                        RequestContinuation = contToken
+                    });
 
-            ConsoleNewLine();
+                ConsoleShowQueryContToken(contToken);
+                ConsoleShowQueryRU(descResp.RuCharge);
+                foreach (KeyValuePair<string, QueryMetrics> kvp in descResp.Metrics)
+                {
+                    ConsoleShowQueryMetrics(kvp.Key, kvp.Value);
+                }
+                contToken = descResp.ContToken;
+            } while (!string.IsNullOrEmpty(contToken));
+
+            Console.SetOut(oldOut);
+            writer.Close();
+            ostrm.Close();
+            try
+            {
+                string filename = String.Format("{0:yyyy-MM-dd_hh-mm-ss-tt}_ASC", DateTime.Now);
+                ostrm = new FileStream($"../../output/{filename}.txt", FileMode.CreateNew, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot create file for writing");
+                Console.WriteLine(e.Message);
+                return;
+            }
+            Console.SetOut(writer);
 
 
             /**
@@ -83,19 +107,28 @@
             var ascQuery = "SELECT * from m WHERE m.createdDateTimeUtc != null ORDER BY m.createdDateTimeUtc ASC";
             ConsoleShowQueryHeader(ascQuery);
 
-            var ascResp = await provider.ExecuteQueryAsync<object>(
-                collectionUri.ToString(),
-                ascQuery,
-                new FeedOptions()
-                {
-                    EnableCrossPartitionQuery = true,
-                    PopulateQueryMetrics = true
-                });
-            ConsoleShowQueryRU(ascResp.RuCharge);
-            foreach (KeyValuePair<string, QueryMetrics> kvp in ascResp.Metrics)
+            contToken = null;
+            do
             {
-                ConsoleShowQueryMetrics(kvp.Key, kvp.Value);
-            }
+                var ascResp = await provider.ExecuteQueryAsync<object>(
+                    collectionUri.ToString(),
+                    ascQuery,
+                    new FeedOptions()
+                    {
+                        EnableCrossPartitionQuery = true,
+                        PopulateQueryMetrics = true,
+                        MaxItemCount = 100,
+                        RequestContinuation = contToken
+                    });
+
+                ConsoleShowQueryContToken(contToken);
+                ConsoleShowQueryRU(ascResp.RuCharge);
+                foreach (KeyValuePair<string, QueryMetrics> kvp in ascResp.Metrics)
+                {
+                    ConsoleShowQueryMetrics(kvp.Key, kvp.Value);
+                }
+                contToken = ascResp.ContToken;
+            } while (!string.IsNullOrEmpty(contToken));
 
             Console.SetOut(oldOut);
             writer.Close();
@@ -108,6 +141,11 @@
             {
                 Console.WriteLine();
             }
+        }
+
+        private static void ConsoleShowQueryContToken(string token)
+        {
+            Console.WriteLine($"========== CONT TOKEN: {token} ==========");
         }
 
         private static void ConsoleShowQueryRU(double ru)
